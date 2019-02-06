@@ -42,7 +42,8 @@ RUN { \
 RUN pecl install APCu-4.0.11 \
  && docker-php-ext-enable apcu
 
-ENV KNOWN_VERSION 0.9.9
+ENV KNOWN_VERSION 0.9.9-a
+ENV KNOWN_BUILD 2019020401
 VOLUME /var/www/html
 
 RUN fetchDeps=" \
@@ -51,12 +52,14 @@ RUN fetchDeps=" \
   " \
  && apt-get update \
  && apt-get install -y --no-install-recommends $fetchDeps \
- && curl -o known.tgz -fSL http://assets.withknown.com/releases/known-${KNOWN_VERSION}.tgz \
- && curl -o known.tgz.sig -fSL http://assets.withknown.com/releases/known-${KNOWN_VERSION}.tgz.sig \
+ && curl -o known.tgz -fSL http://assets.withknown.com/releases/mapkyca-known-${KNOWN_VERSION}-${KNOWN_BUILD}.tgz \
+ && curl -o known.tgz.sig -fSL http://assets.withknown.com/releases/mapkyca-known-${KNOWN_VERSION}-${KNOWN_BUILD}.tgz.sha256 \
+ && curl -o known.tgz.sig.gpg -fSL http://assets.withknown.com/releases/mapkyca-known-${KNOWN_VERSION}-${KNOWN_BUILD}.tgz.sha256.gpg \
  && export GNUPGHOME="$(mktemp -d)" \
 #gpg key from hello@withknown.com
- && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "53DE 5B99 2244 9132 8B92 7516 052D B5AC 742E 3B47" \
- && gpg --batch --verify known.tgz.sig known.tgz \
+ && gpg --keyserver ha.pool.sks-keyservers.net --recv-keys "EC81 48CF 845C 2043 948F FF81 BACB 0C9A AA54 ED56" \
+ && gpg --batch --verify known.tgz.sig.gpg known.tgz.sig \
+ && sha256sum -c known.tgz.sig \ 
  && mkdir /usr/src/known \
  && tar -xf known.tgz -C /usr/src/known \
  && rm -r "$GNUPGHOME" known.tgz* \
